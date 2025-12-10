@@ -57,6 +57,84 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Accessibility: Skip link */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--primary-gradient);
+  color: white;
+  padding: 12px 24px;
+  text-decoration: none;
+  font-weight: 600;
+  border-radius: 0 0 8px 0;
+  z-index: 1000;
+  transition: top 0.3s;
+}
+
+.skip-link:focus {
+  top: 0;
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+
+/* Accessibility: Screen reader only content */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Accessibility: Focus indicators */
+*:focus-visible {
+  outline: 3px solid #667eea;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+button:focus-visible,
+select:focus-visible,
+input:focus-visible {
+  outline: 3px solid #667eea;
+  outline-offset: 2px;
+}
+
+/* Accessibility: High contrast mode support */
+@media (prefers-contrast: high) {
+  :root {
+    --text-primary: #000000;
+    --text-secondary: #333333;
+    --card-bg: #ffffff;
+  }
+  
+  .card {
+    border: 2px solid #000000;
+  }
+  
+  .select-control,
+  .input-control {
+    border: 2px solid #000000;
+  }
+}
+
+/* Accessibility: Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 /* Анимированный фон - оптимизирован */
 body::before {
   content: "";
@@ -451,7 +529,8 @@ body::after {
   border: 2px solid transparent;
 }
 
-.select-control:focus {
+.select-control:focus,
+.select-control:focus-visible {
   border-color: #667eea;
   box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.25),
               0 8px 30px rgba(102, 126, 234, 0.5),
@@ -460,6 +539,8 @@ body::after {
   background: linear-gradient(white, white) padding-box,
     var(--primary-gradient) border-box;
   border: 2px solid transparent;
+  outline: 3px solid #667eea;
+  outline-offset: 2px;
 }
 
 .swap-btn {
@@ -523,6 +604,11 @@ body::after {
               0 0 50px rgba(250, 112, 154, 0.4);
 }
 
+.swap-btn:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 3px;
+}
+
 .swap-btn:active {
   transform: rotate(180deg) scale(0.95);
 }
@@ -572,7 +658,8 @@ body::after {
   transform: translateY(-3px) translateZ(0);
 }
 
-.input-control:focus {
+.input-control:focus,
+.input-control:focus-visible {
   border-color: #667eea;
   box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2),
               0 8px 25px rgba(102, 126, 234, 0.3),
@@ -581,6 +668,13 @@ body::after {
   background: linear-gradient(white, white) padding-box,
     var(--primary-gradient) border-box;
   border: 2px solid transparent;
+  outline: 3px solid #667eea;
+  outline-offset: 2px;
+}
+
+.input-control:read-only {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
 }
 
 .equals-sign {

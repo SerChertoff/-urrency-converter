@@ -1,12 +1,12 @@
 import { roundFiveDigits } from "./helpers.js";
 
-// Кэширование DOM элементов
-const firstSelect = document.querySelector("[data-first-select]");
-const secondSelect = document.querySelector("[data-second-select]");
+// Кэширование DOM элементов (используем ID для лучшей доступности)
+const firstSelect = document.getElementById("firstSelect") || document.querySelector("[data-first-select]");
+const secondSelect = document.getElementById("secondSelect") || document.querySelector("[data-second-select]");
 const swapBtn = document.querySelector("[data-swap-btn]");
 const comparisonInfo = document.querySelector("[data-comparison-info]");
-const firstInput = document.querySelector("[data-first-input]");
-const secondInput = document.querySelector("[data-second-input]");
+const firstInput = document.getElementById("firstInput") || document.querySelector("[data-first-input]");
+const secondInput = document.getElementById("secondInput") || document.querySelector("[data-second-input]");
 const popularCurrenciesContainer = document.querySelector(
   "[data-popular-currencies]"
 );
@@ -55,6 +55,7 @@ const debounce = (func, wait) => {
 const renderInfo = () => {
   if (!rates || !rates[secondSelect.value]) {
     comparisonInfo.textContent = "Загрузка...";
+    comparisonInfo.setAttribute("aria-live", "polite");
     return;
   }
 
@@ -63,6 +64,10 @@ const renderInfo = () => {
     minimumFractionDigits: 2,
     maximumFractionDigits: 6,
   });
+
+  // Обновляем aria-label для screen readers
+  const rateText = `1 ${firstSelect.value} равно ${formattedRate} ${secondSelect.value}`;
+  comparisonInfo.setAttribute("aria-label", `Текущий курс обмена: ${rateText}`);
 
   // Используем textContent для быстрого обновления, затем innerHTML для стилей
   requestAnimationFrame(() => {
@@ -152,17 +157,35 @@ const createPopularCurrencies = () => {
     chip.textContent = `${currency.code} ${currency.symbol}`;
     chip.title = currency.name;
     chip.setAttribute("data-currency", currency.code);
+    chip.setAttribute("aria-label", `Выбрать валюту ${currency.name} (${currency.code})`);
+    chip.setAttribute("aria-pressed", "false");
+    chip.setAttribute("type", "button");
 
     // Используем делегирование событий через один обработчик
     chip.addEventListener("click", () => {
       if (isUpdating) return;
       
       // Обновляем активные чипы
-      currencyChips.forEach((c) => c.classList.remove("active"));
+      currencyChips.forEach((c) => {
+        c.classList.remove("active");
+        c.setAttribute("aria-pressed", "false");
+      });
       chip.classList.add("active");
+      chip.setAttribute("aria-pressed", "true");
 
       firstSelect.value = currency.code;
       updateExchangeRates();
+      
+      // Фокус на селект для screen readers
+      firstSelect.focus();
+    });
+
+    // Поддержка клавиатурной навигации
+    chip.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        chip.click();
+      }
     });
 
     currencyChips.set(currency.code, chip);
