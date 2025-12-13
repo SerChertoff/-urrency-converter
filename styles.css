@@ -200,6 +200,16 @@ input:focus-visible {
     transform: none;
   }
   
+  .swap-btn:hover,
+  .swap-btn:active {
+    transform: none;
+    /* Гарантируем круглую форму на мобильных */
+    border-radius: 50%;
+    aspect-ratio: 1;
+    width: 56px;
+    height: 56px;
+  }
+  
   .select-control:hover,
   .select-control:focus {
     transform: none;
@@ -367,8 +377,6 @@ body::before {
   display: flex;
   flex-direction: column;
   gap: 24px;
-  width: 100%;
-  box-sizing: border-box;
 }
 
 /* Увеличение отступов между секциями на десктопе */
@@ -387,7 +395,6 @@ body::before {
 /* Популярные валюты */
 .popular-currencies {
   margin-bottom: 8px;
-  width: 100%;
   /* Убрана анимация - одноразовая анимация не критична */
 }
 
@@ -557,7 +564,7 @@ body::before {
 .swap-btn {
   width: 64px;
   height: 64px;
-  border-radius: 50%;
+  border-radius: 50% !important;
   border: none;
   background: var(--primary-gradient);
   color: white;
@@ -575,18 +582,27 @@ body::before {
   -webkit-tap-highlight-color: transparent;
   min-width: 64px;
   min-height: 64px;
+  max-width: 64px;
+  max-height: 64px;
+  /* Гарантируем круглую форму - всегда круглая */
+  aspect-ratio: 1 / 1 !important;
+  flex-shrink: 0;
+  /* Предотвращаем деформацию */
+  box-sizing: border-box;
 }
 
 .swap-btn::after {
   content: "";
   position: absolute;
   inset: -4px;
-  border-radius: 50%;
+  border-radius: 50% !important;
   background: var(--primary-gradient);
   opacity: 0.2;
   z-index: -1;
   /* Упрощенная анимация - только transform и opacity, замедлена */
   animation: ripple 4s ease-out infinite;
+  /* Гарантируем круглую форму псевдоэлемента */
+  aspect-ratio: 1 / 1;
 }
 
 @keyframes ripple {
@@ -614,17 +630,47 @@ body::before {
 }
 
 .swap-btn:hover {
-  transform: rotate(180deg) scale(1.1);
+  /* Убираем scale, чтобы кнопка не деформировалась */
+  transform: rotate(180deg);
   box-shadow: 0 10px 35px rgba(102, 126, 234, 0.6);
+  /* Гарантируем круглую форму при hover - всегда круглая */
+  border-radius: 50% !important;
+  aspect-ratio: 1 / 1 !important;
+  width: 64px !important;
+  height: 64px !important;
+  min-width: 64px !important;
+  min-height: 64px !important;
+  max-width: 64px !important;
+  max-height: 64px !important;
 }
 
 .swap-btn:focus-visible {
   outline: 3px solid #fff;
   outline-offset: 3px;
+  /* Гарантируем круглую форму при фокусе - всегда круглая */
+  border-radius: 50% !important;
+  aspect-ratio: 1 / 1 !important;
+  width: 64px !important;
+  height: 64px !important;
+  min-width: 64px !important;
+  min-height: 64px !important;
+  max-width: 64px !important;
+  max-height: 64px !important;
 }
 
 .swap-btn:active {
-  transform: rotate(180deg) scale(0.95);
+  /* Убираем scale, чтобы кнопка не деформировалась */
+  transform: rotate(180deg);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+  /* Гарантируем круглую форму при нажатии - всегда круглая */
+  border-radius: 50% !important;
+  aspect-ratio: 1 / 1 !important;
+  width: 64px !important;
+  height: 64px !important;
+  min-width: 64px !important;
+  min-height: 64px !important;
+  max-width: 64px !important;
+  max-height: 64px !important;
 }
 
 .swap-btn svg {
@@ -632,6 +678,12 @@ body::before {
   height: 24px;
   position: relative;
   z-index: 1;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Класс для анимации поворота стрелок */
+.swap-btn.rotating svg {
+  transform: rotate(180deg);
 }
 
 .inputs-wrapper {
@@ -771,8 +823,6 @@ body::before {
     width: 100%;
     /* Исправление для правильного скролла */
     position: relative;
-    /* Предотвращаем обрезание элементов */
-    overflow: visible;
   }
 
   .card {
@@ -782,8 +832,6 @@ body::before {
     width: 100%;
     /* Исправление верстки */
     box-sizing: border-box;
-    /* Предотвращаем обрезание элементов */
-    overflow: visible;
   }
 
   .logo {
@@ -830,11 +878,21 @@ body::before {
   .swap-btn {
     margin-top: 0;
     margin-bottom: 0;
+    margin-left: auto;
+    margin-right: auto;
     order: 2;
     width: 56px;
     height: 56px;
     min-width: 56px;
     min-height: 56px;
+    max-width: 56px;
+    max-height: 56px;
+    /* Гарантируем круглую форму на мобильных - всегда круглая */
+    border-radius: 50% !important;
+    aspect-ratio: 1 / 1 !important;
+    flex-shrink: 0;
+    /* Предотвращаем деформацию */
+    box-sizing: border-box;
     /* Улучшаем touch target */
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
@@ -843,6 +901,12 @@ body::before {
   .swap-btn svg {
     width: 22px;
     height: 22px;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Анимация поворота стрелок при нажатии на мобильных */
+  .swap-btn.rotating svg {
+    transform: rotate(180deg);
   }
 
   .inputs-wrapper {
@@ -880,28 +944,25 @@ body::before {
 
   .currency-chips {
     gap: 8px;
-    justify-content: center;
+    justify-content: flex-start;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
-    padding: 4px 16px 8px 16px;
-    margin: 0 -16px;
+    padding-bottom: 4px;
     /* Улучшаем скролл на мобильных */
-    scroll-padding: 16px;
-    /* Предотвращаем обрезание кнопок */
-    box-sizing: border-box;
+    scroll-padding: 0 16px;
   }
 
   .currency-chips::-webkit-scrollbar {
     display: none;
   }
 
-  /* Добавляем отступы для видимости при скролле */
+  /* Улучшаем видимость при скролле */
   .currency-chips::before,
   .currency-chips::after {
     content: '';
     flex-shrink: 0;
-    width: 8px;
+    width: 0;
   }
 
   .currency-chip {
@@ -924,12 +985,7 @@ body::before {
   .popular-label {
     font-size: 11px;
     margin-bottom: 10px;
-    text-align: center;
-  }
-
-  .popular-currencies {
-    text-align: center;
-    width: 100%;
+    text-align: left;
   }
 
   .rate-info {

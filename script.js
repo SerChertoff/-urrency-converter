@@ -79,13 +79,18 @@ const renderInfo = () => {
     `;
   });
 
-  // Обновляем значения только если они не в фокусе
-  if (document.activeElement !== firstInput) {
-    firstInput.value = rates[firstSelect.value] || 1;
-  }
-  if (document.activeElement !== secondInput) {
+  // Обновляем значения только если они не в фокусе и не пустые
+  if (document.activeElement !== firstInput && firstInput.value) {
     const value = parseFloat(firstInput.value) || 0;
-    secondInput.value = roundFiveDigits(value * rates[secondSelect.value]);
+    if (value > 0 && rates[secondSelect.value]) {
+      secondInput.value = roundFiveDigits(value * rates[secondSelect.value]);
+    }
+  }
+  if (document.activeElement !== secondInput && secondInput.value) {
+    const value = parseFloat(secondInput.value) || 0;
+    if (value > 0 && rates[secondSelect.value]) {
+      firstInput.value = roundFiveDigits(value / rates[secondSelect.value]);
+    }
   }
 };
 
@@ -247,15 +252,87 @@ secondSelect.addEventListener("change", () => renderInfo());
 firstInput.addEventListener("input", handleFirstInput);
 secondInput.addEventListener("input", handleSecondInput);
 
-swapBtn.addEventListener("click", () => {
+// Обработчик для кнопки swap
+const handleSwap = async (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  
   if (isUpdating) return;
   
-  const temp = firstSelect.value;
+  // Добавляем класс для анимации поворота стрелок
+  swapBtn.classList.add("rotating");
+  
+  // Сохраняем текущие значения
+  const tempSelect = firstSelect.value;
+  const firstInputValue = firstInput.value;
+  const secondInputValue = secondInput.value;
+  
+  // Меняем селекты местами
   firstSelect.value = secondSelect.value;
-  secondSelect.value = temp;
+  secondSelect.value = tempSelect;
+  
+  // Обновляем курсы для новой базовой валюты
+  await updateExchangeRates();
+  
+  // После обновления курсов пересчитываем значения инпутов
+  if (firstInputValue && parseFloat(firstInputValue) > 0) {
+    // Если был заполнен первый инпут, пересчитываем второй на основе нового курса
+    const value = parseFloat(firstInputValue);
+    if (rates && rates[secondSelect.value]) {
+      secondInput.value = roundFiveDigits(value * rates[secondSelect.value]);
+    }
+  } else if (secondInputValue && parseFloat(secondInputValue) > 0) {
+    // Если был заполнен второй инпут, пересчитываем первый на основе нового курса
+    const value = parseFloat(secondInputValue);
+    if (rates && rates[secondSelect.value]) {
+      firstInput.value = roundFiveDigits(value / rates[secondSelect.value]);
+    }
+  } else {
+    // Если оба пустые, просто обновляем информацию
+    renderInfo();
+  }
+  
+  // Убираем класс после завершения анимации
+  setTimeout(() => {
+    swapBtn.classList.remove("rotating");
+  }, 400);
+};
 
-  updateExchangeRates();
-});
+// Обработчик клика для десктопа и мобильных
+swapBtn.addEventListener("click", handleSwap);
+
+// Обработчик touch для мобильных устройств
+let touchStartTime = 0;
+let touchStartX = 0;
+let touchStartY = 0;
+
+swapBtn.addEventListener("touchstart", (e) => {
+  touchStartTime = Date.now();
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+  // Добавляем класс для анимации при начале касания
+  swapBtn.classList.add("rotating");
+  e.stopPropagation();
+}, { passive: true });
+
+swapBtn.addEventListener("touchend", (e) => {
+  e.stopPropagation();
+  const touchDuration = Date.now() - touchStartTime;
+  const touchEndX = e.changedTouches[0].clientX;
+  const touchEndY = e.changedTouches[0].clientY;
+  
+  // Проверяем, что это был короткий тап (не свайп)
+  const deltaX = Math.abs(touchEndX - touchStartX);
+  const deltaY = Math.abs(touchEndY - touchStartY);
+  
+  if (touchDuration < 300 && deltaX < 10 && deltaY < 10) {
+    e.preventDefault();
+    handleSwap(e);
+  } else {
+    // Если это был свайп, убираем класс
+    swapBtn.classList.remove("rotating");
+  }
+}, { passive: false });
 
 // Инициализация
 const getInitialRates = async () => {
